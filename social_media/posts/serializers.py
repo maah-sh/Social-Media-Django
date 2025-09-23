@@ -17,24 +17,22 @@ class CommentedObjectRelatedField(serializers.RelatedField):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    comments = CommentedObjectRelatedField(many=True,  queryset=Comment.objects.all())
+    comments = CommentedObjectRelatedField(many=True, required=False, read_only=True)
     class Meta:
         model = Post
         fields = ['id', 'title', 'content', 'image', 'published', 'owner', 'comments', 'created', 'updated']
         extra_kwargs = {
             'owner': {'read_only': True},
-            'comments': {'read_only': True},
         }
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    replies = CommentedObjectRelatedField(many=True, queryset=Comment.objects.all())
+    replies = CommentedObjectRelatedField(many=True, required=False, read_only=True)
     class Meta:
         model = Comment
         fields = ['id', 'owner', 'text', 'replies']
         extra_kwargs = {
             'owner': {'read_only': True},
-            'replies': {'read_only': True},
         }
 
 class CommentCreationSerializer(serializers.Serializer):
