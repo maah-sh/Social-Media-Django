@@ -1,10 +1,13 @@
 from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.shortcuts import get_object_or_404
-from .models import Post
-from .serializers import PostSerializer
-from .permissions import IsOwnerOrReadOnlyPublished
+from .models import Post, Comment
+from .serializers import PostSerializer, CommentSerializer, CommentCreationSerializer
+from .permissions import IsOwner, IsOwnerOrReadOnlyPublished
 
 
 class UserPostsList(generics.ListAPIView):
@@ -37,3 +40,28 @@ class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnlyPublished]
 
 
+class CommentCreate(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = CommentCreationSerializer(data=request.data)
+        if serializer.is_valid():
+            comment = serializer.save(owner=self.request.user)
+            comment_serializer = CommentSerializer(instance=comment)
+            return Response(comment_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommentUpdate(generics.UpdateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsOwner]
+
+
+class CommentDestroy(generics.DestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsOwner]
