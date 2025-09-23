@@ -1,1 +1,1 @@
-### Social Media project implemented using Django Rest Framework
+### Social Media project implemented using Django Rest Framework (not completed)
