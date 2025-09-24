@@ -53,14 +53,7 @@ class CommentCreate(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CommentUpdate(generics.UpdateAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsOwner]
-
-
-class CommentDestroy(generics.DestroyAPIView):
+class CommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     authentication_classes = [JWTAuthentication]

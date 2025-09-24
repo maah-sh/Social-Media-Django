@@ -3,21 +3,51 @@ from .models import Post, Comment
 from django.contrib.contenttypes.models import ContentType
 
 
-class CommentedObjectRelatedField(serializers.RelatedField):
+class CommentRelatedField(serializers.RelatedField):
 
     def to_representation(self, value):
-        if isinstance(value, Post):
-            serializer = PostSerializer(value)
-        elif isinstance(value, Comment):
+        if isinstance(value, Comment):
             serializer = CommentSerializer(value)
         else:
-            raise Exception('Unexpected type of commented object')
+            raise Exception('Unexpected type for comment')
 
         return serializer.data
 
 
+class CommentedObjectRelatedField(serializers.RelatedField):
+
+    def to_representation(self, value):
+        if isinstance(value, Post):
+            return 'post_id: ' + str(value.pk)
+        elif isinstance(value, Comment):
+            return 'comment_id: ' + str(value.pk)
+        raise Exception('Unexpected type of commented object')
+
+
+# class CommentRelatedSerializer(serializers.ModelSerializer):
+#     replies = CommentRelatedField(many=True, required=False, read_only=True)
+#     class Meta:
+#         model = Comment
+#         fields = ['id', 'owner', 'text', 'replies']
+#         extra_kwargs = {
+#             'owner': {'read_only': True},
+#         }
+
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    replies = CommentRelatedField(many=True, required=False, read_only=True)
+    content_object = CommentedObjectRelatedField(required=False, read_only=True)
+    class Meta:
+        model = Comment
+        fields = ['id', 'content_object', 'owner', 'text', 'replies']
+        extra_kwargs = {
+            'owner': {'read_only': True},
+        }
+
+
 class PostSerializer(serializers.ModelSerializer):
-    comments = CommentedObjectRelatedField(many=True, required=False, read_only=True)
+    comments = CommentRelatedField(many=True, required=False, read_only=True)
     class Meta:
         model = Post
         fields = ['id', 'title', 'content', 'image', 'published', 'owner', 'comments', 'created', 'updated']
@@ -25,15 +55,6 @@ class PostSerializer(serializers.ModelSerializer):
             'owner': {'read_only': True},
         }
 
-
-class CommentSerializer(serializers.ModelSerializer):
-    replies = CommentedObjectRelatedField(many=True, required=False, read_only=True)
-    class Meta:
-        model = Comment
-        fields = ['id', 'owner', 'text', 'replies']
-        extra_kwargs = {
-            'owner': {'read_only': True},
-        }
 
 class CommentCreationSerializer(serializers.Serializer):
     text = serializers.CharField(required=True)
