@@ -24,17 +24,6 @@ class CommentedObjectRelatedField(serializers.RelatedField):
         raise Exception('Unexpected type of commented object')
 
 
-# class CommentRelatedSerializer(serializers.ModelSerializer):
-#     replies = CommentRelatedField(many=True, required=False, read_only=True)
-#     class Meta:
-#         model = Comment
-#         fields = ['id', 'owner', 'text', 'replies']
-#         extra_kwargs = {
-#             'owner': {'read_only': True},
-#         }
-
-
-
 class CommentSerializer(serializers.ModelSerializer):
     replies = CommentRelatedField(many=True, required=False, read_only=True)
     content_object = CommentedObjectRelatedField(required=False, read_only=True)
