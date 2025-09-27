@@ -1,4 +1,6 @@
+from django.db.models import Count
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 from .models import Post, Comment
 from django.contrib.contenttypes.models import ContentType
 
@@ -6,11 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 class CommentRelatedField(serializers.RelatedField):
 
     def to_representation(self, value):
-        if isinstance(value, Comment):
-            serializer = CommentSerializer(value)
-        else:
-            raise Exception('Unexpected type for comment')
-
+        serializer = CommentSerializer(value)
         return serializer.data
 
 
@@ -36,13 +34,18 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    comments = CommentRelatedField(many=True, required=False, read_only=True)
+    comments_count = SerializerMethodField()
+
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'image', 'published', 'owner', 'comments', 'created', 'updated']
+        fields = ['id', 'title', 'content', 'image', 'published', 'owner', 'created', 'updated', 'comments_count']
         extra_kwargs = {
             'owner': {'read_only': True},
         }
+
+    def get_comments_count(self, post):
+        comments = post.comments
+        return comments.count() + comments.aggregate(Count('replies'))['replies__count']
 
 
 class CommentCreationSerializer(serializers.Serializer):
