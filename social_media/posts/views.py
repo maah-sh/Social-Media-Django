@@ -1,3 +1,4 @@
+from django.core.serializers import serialize
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -58,3 +59,13 @@ class CommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CommentSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsOwner]
+
+
+class PostComments(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnlyPublished]
+
+    def get(self, request, pk, format=None):
+        comments = Comment.objects.filter(post__pk=pk)
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)

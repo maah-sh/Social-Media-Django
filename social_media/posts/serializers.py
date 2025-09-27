@@ -41,6 +41,7 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'content', 'image', 'published', 'owner', 'created', 'updated', 'comments_count']
         extra_kwargs = {
             'owner': {'read_only': True},
+            'image': {'required': False}
         }
 
     def get_comments_count(self, post):

@@ -10,7 +10,7 @@ class Post(models.Model):
     image = models.ImageField(upload_to="posts/images")
     published = models.BooleanField(default=False)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='posts', on_delete=models.CASCADE)
-    comments = GenericRelation('Comment')
+    comments = GenericRelation('Comment', related_query_name='post')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
