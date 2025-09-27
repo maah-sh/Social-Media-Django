@@ -8,7 +8,7 @@ urlpatterns = [
     path('post/<int:pk>/', views.PostRetrieveUpdateDestroy.as_view()),
     path('comment/', views.CommentCreate.as_view()),
     path('comment/<int:pk>/', views.CommentRetrieveUpdateDestroy.as_view()),
-    path('post/comments/<int:pk>/', views.PostComments.as_view()),
+    path('post/comments/<int:pk>/', views.PostCommentsList.as_view()),
     path('post/like/', views.LikePost.as_view()),
     path('post/dislike/', views.LikePost.as_view(dislike=True)),
 ]
