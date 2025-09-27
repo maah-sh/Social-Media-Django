@@ -1,4 +1,3 @@
-from django.core.serializers import serialize
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -69,3 +68,20 @@ class PostComments(APIView):
         comments = Comment.objects.filter(post__pk=pk)
         serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data)
+
+
+class LikePost(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    dislike = False
+
+    def post(self, request):
+        if 'post_id' not in request.data:
+            return Response({"post_id": "This field is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        post = get_object_or_404(Post, id=request.data['post_id'])
+        if self.dislike:
+            post.likes.remove(self.request.user)
+        else:
+            post.likes.add(self.request.user)
+        return Response({"posts_count": post.likes.count()}, status=status.HTTP_200_OK)

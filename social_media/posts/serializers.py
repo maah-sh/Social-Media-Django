@@ -34,15 +34,19 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
+    likes_count = SerializerMethodField()
     comments_count = SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'image', 'published', 'owner', 'created', 'updated', 'comments_count']
+        fields = ['id', 'title', 'content', 'image', 'published', 'owner', 'created', 'updated', 'likes_count', 'comments_count']
         extra_kwargs = {
             'owner': {'read_only': True},
             'image': {'required': False}
         }
+
+    def get_likes_count(self, post):
+        return post.likes.count()
 
     def get_comments_count(self, post):
         comments = post.comments
