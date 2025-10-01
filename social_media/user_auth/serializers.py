@@ -1,16 +1,19 @@
 from django.contrib.auth.models import User
-from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from user_profile.serializers import ProfileSerializer
+from user_profile.models import Profile
+from django.db import transaction
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(required=True, write_only=True)
     password_confirmation = serializers.CharField(required=True, write_only=True)
+    profile = ProfileSerializer()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'password_confirmation']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'password_confirmation', 'profile']
         extra_kwargs = {
             'username': {'required': True, 'validators': [UniqueValidator(queryset=User.objects.all())]},
             'email': {'required': True, 'validators': [UniqueValidator(queryset=User.objects.all())]},
@@ -23,13 +26,22 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         data.pop('password_confirmation')
         return data
 
+    @transaction.atomic
+    def create(self, validated_data):
+        profile_data = validated_data.pop('profile')
+        user = User.objects.create(**validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        Profile.objects.create(user=user, **profile_data)
+        return user
+
 
 class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     password = serializers.CharField(required=True, write_only=True)
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserReadOnlySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email']

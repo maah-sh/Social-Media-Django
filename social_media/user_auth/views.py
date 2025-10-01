@@ -1,10 +1,11 @@
+from django.db import DatabaseError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-from .serializers import UserRegisterSerializer, UserLoginSerializer, UserProfileSerializer
+from .serializers import UserRegisterSerializer, UserLoginSerializer, UserReadOnlySerializer
 
 
 class Register(APIView):
@@ -12,13 +13,7 @@ class Register(APIView):
         serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            user = User.objects.get(username=request.data['username'])
-            user.set_password(request.data['password'])
-            user.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -34,14 +29,14 @@ class Login(APIView):
             return Response({"details": "Password doesn't match"}, status=status.HTTP_404_NOT_FOUND)
 
         refresh_token = RefreshToken.for_user(user)
-        profile_serializer = UserProfileSerializer(instance=user)
+        user_serializer = UserReadOnlySerializer(instance=user)
         return Response(
             {
                 "token": {
                     'refresh': str(refresh_token),
                     'access': str(refresh_token.access_token),
                 },
-                "user": profile_serializer.data
+                "user": user_serializer.data
             },
             status=status.HTTP_200_OK
         )
