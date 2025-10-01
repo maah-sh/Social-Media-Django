@@ -8,7 +8,7 @@ class Post(models.Model):
     title = models.CharField(max_length=200, blank=True, default='')
     content = models.TextField()
     image = models.ImageField(upload_to="posts/images")
-    published = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default=False)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='posts', on_delete=models.CASCADE)
     likes = models.ManyToManyField(settings.AUTH_USER_MODEL)
     comments = GenericRelation('Comment', related_query_name='post')

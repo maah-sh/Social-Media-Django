@@ -14,14 +14,17 @@ class UserPostsList(generics.ListAPIView):
     serializer_class = PostSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    is_archived = False
 
     def get_queryset(self):
-        return Post.objects.filter(owner=self.request.user)
+        return Post.objects.filter(owner=self.request.user, is_archived=self.is_archived)
 
 
-class PublishedPostsList(generics.ListAPIView):
-    queryset = Post.objects.filter(published=True)
+class PostsList(generics.ListAPIView):
+    queryset = Post.objects.filter(owner__profile__is_private=False, is_archived=False)
     serializer_class = PostSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
 
 class PostCreate(generics.CreateAPIView):

@@ -19,7 +19,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
      profile = ProfileSerializer()
      posts_count = SerializerMethodField()
-     posts = PostSerializer(many=True)
+     posts = SerializerMethodField()
 
      class Meta:
          model = User
@@ -39,5 +39,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
      def get_posts_count(self, user):
-         return user.posts.count()
+         return user.posts.filter(is_archived=False).count()
+
+     def get_posts(self, user):
+         posts = user.posts.filter(is_archived=False)
+         return PostSerializer(posts, many=True).data
 
