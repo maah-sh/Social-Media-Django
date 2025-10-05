@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from user_profile.serializers import ProfileSerializer
-from user_profile.models import Profile
+from users.serializers import ProfileSerializer
+from users.models import Profile
 from django.db import transaction
 
 

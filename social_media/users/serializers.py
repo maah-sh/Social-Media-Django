@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from django.contrib.auth.models import User
-from user_profile.models import Profile
+from users.models import Profile
 from posts.serializers import PostSerializer
 
 

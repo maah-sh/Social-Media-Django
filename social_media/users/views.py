@@ -5,8 +5,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
-from user_profile.models import Profile
-from user_profile.serializers import ProfileSerializer, UserProfileSerializer
+from users.models import Profile
+from users.serializers import ProfileSerializer, UserProfileSerializer
 
 
 class ProfileUpdate(generics.UpdateAPIView):
