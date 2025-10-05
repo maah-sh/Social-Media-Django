@@ -88,4 +88,4 @@ class LikePost(APIView):
         else:
             post.likes.add(self.request.user)
 
-        return Response({"posts_count": post.likes.count()}, status=status.HTTP_200_OK)
+        return Response({"likes_count": post.likes.count()}, status=status.HTTP_200_OK)
