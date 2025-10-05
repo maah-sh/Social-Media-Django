@@ -20,6 +20,9 @@ request_kwargs_list = [
     {'method': 'GET', 'url': server + 'posts/post/7/', 'auth': BearerTokenAuth(token)},
     {'method': 'PUT', 'url': server + 'posts/post/5/', 'auth': BearerTokenAuth(token), 'json': {"published": "True"}},
     {'method': 'DELETE', 'url': server + 'posts/post/16/', 'auth': BearerTokenAuth(token)},
+    {'method': 'GET', 'url': server + 'posts/post/comments/7/', 'auth': BearerTokenAuth(token)},
+    {'method': 'POST', 'url': server + 'posts/post/like/', 'auth': BearerTokenAuth(token), 'json': {"post_id": "3"}},
+    {'method': 'POST', 'url': server + 'posts/post/dislike/', 'auth': BearerTokenAuth(token), 'json': {"post_id": "4"}}
 ]
 
 for kwargs in request_kwargs_list:
