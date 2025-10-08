@@ -79,13 +79,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
              'last_name': {'read_only': True},
          }
 
-     def __init__(self, *args, **kwargs):
-         is_private = kwargs.pop('is_private', False)
-         super().__init__(*args, **kwargs)
-
-         if is_private:
-             self.fields.pop('posts')
-
 
      def get_posts_count(self, user):
          return user.posts.filter(is_archived=False).count()
@@ -94,3 +87,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
          posts = user.posts.filter(is_archived=False)
          return PostSerializer(posts, many=True).data
 
+
+class UserPrivateProfileSerializer(UserProfileSerializer):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields.pop('posts')

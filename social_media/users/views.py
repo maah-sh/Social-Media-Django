@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from users.models import Profile, Follow, FollowRequest, FollowRequestStatus
 from users.serializers import UserRegisterSerializer, UserLoginSerializer, UserReadOnlySerializer
-from users.serializers import ProfileSerializer, UserProfileSerializer
+from users.serializers import ProfileSerializer, UserProfileSerializer, UserPrivateProfileSerializer
 from users.services import FollowService
 
 
@@ -71,17 +71,17 @@ class ProfileUpdate(generics.UpdateAPIView):
         return obj
 
 
-class ProfileRetrieve(APIView):
+class ProfileRetrieve(generics.RetrieveAPIView):
+    queryset = User.objects.all()
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    lookup_field = 'username'
 
-    def get(self, request, username):
-        user = User.objects.get(username=username)
-        if user == request.user or not user.profile.is_private:
-            serializer = UserProfileSerializer(user)
-        else:
-            serializer = UserProfileSerializer(user, is_private = True)
-        return Response(serializer.data)
+    def get_serializer_class(self):
+        user = self.get_object()
+        if user == self.request.user or not user.profile.is_private or user.followers.filter(follower_user=self.request.user):
+            return UserProfileSerializer
+        return UserPrivateProfileSerializer
 
 
 class FollowUser(APIView):
