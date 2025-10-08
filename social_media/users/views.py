@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from users.models import Profile, Follow, FollowRequest, FollowRequestStatus
 from users.serializers import UserRegisterSerializer, UserLoginSerializer, UserReadOnlySerializer
 from users.serializers import ProfileSerializer, UserProfileSerializer, UserPrivateProfileSerializer
+from users.serializers import FollowingSerializer, FollowerSerializer
 from users.services import FollowService
 
 
@@ -152,3 +153,23 @@ class FollowRequestRevoke(APIView):
         follow_service = FollowService(follower_user=request.user, following_user=receiver_user)
         follow_service.revoke_follow_request()
         return Response(follow_service.result(), status=status.HTTP_200_OK)
+
+
+class FollowingList(generics.ListAPIView):
+    serializer_class = FollowingSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.request.user.following.all()
+
+
+class FollowersList(generics.ListAPIView):
+    serializer_class = FollowerSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.request.user.followers.all()
+
+

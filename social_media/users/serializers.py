@@ -3,7 +3,7 @@ from rest_framework.fields import SerializerMethodField
 from rest_framework.validators import UniqueValidator
 from django.db import transaction
 from django.contrib.auth.models import User
-from users.models import Profile
+from users.models import Profile, Follow
 from posts.serializers import PostSerializer
 
 
@@ -93,3 +93,25 @@ class UserPrivateProfileSerializer(UserProfileSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields.pop('posts')
+
+
+class FollowingSerializer(serializers.ModelSerializer):
+    following_username = SerializerMethodField()
+
+    class Meta:
+        model = Follow
+        fields = ['following_user_id', 'following_username']
+
+    def get_following_username(self, obj):
+        return obj.following_user.username
+
+
+class FollowerSerializer(serializers.ModelSerializer):
+    follower_username = SerializerMethodField()
+
+    class Meta:
+        model = Follow
+        fields = ['follower_user_id', 'follower_username']
+
+    def get_follower_username(self, obj):
+        return obj.follower_user.username

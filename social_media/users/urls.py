@@ -12,4 +12,6 @@ urlpatterns = [
     path('follow-request/accept/', views.FollowRequestAccept.as_view()),
     path('follow-request/reject/', views.FollowRequestReject.as_view()),
     path('follow-request/revoke/', views.FollowRequestRevoke.as_view()),
+    path('following-list/', views.FollowingList.as_view()),
+    path('followers-list/', views.FollowersList.as_view()),
 ]
