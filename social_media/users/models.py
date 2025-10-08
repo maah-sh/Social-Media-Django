@@ -25,6 +25,7 @@ class FollowRequestStatus(models.IntegerChoices):
     PENDING = 0, 'Pending'
     ACCEPTED = 1, 'Accepted'
     REJECTED = 2, 'Rejected'
+    REVOKED = 3, 'Revoked'
 
 class FollowRequest(models.Model):
     from_user = models.ForeignKey(User, related_name='sent_follow_requests', on_delete=models.CASCADE)

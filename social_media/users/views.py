@@ -1,4 +1,5 @@
 from rest_framework import generics
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,9 +8,10 @@ from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
-from users.models import Profile
+from users.models import Profile, Follow, FollowRequest, FollowRequestStatus
 from users.serializers import UserRegisterSerializer, UserLoginSerializer, UserReadOnlySerializer
 from users.serializers import ProfileSerializer, UserProfileSerializer
+from users.services import FollowService
 
 
 class Register(APIView):
@@ -80,3 +82,73 @@ class ProfileRetrieve(APIView):
         else:
             serializer = UserProfileSerializer(user, is_private = True)
         return Response(serializer.data)
+
+
+class FollowUser(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if not 'following_username' in request.data:
+            raise ValidationError({"following_username": "Field is required"})
+
+        following_user = get_object_or_404(User, username=request.data['following_username'])
+        follow_service = FollowService(follower_user=request.user, following_user=following_user)
+        follow_service.follow()
+        return Response(follow_service.result(),status=status.HTTP_201_CREATED)
+
+
+class UnfollowUser(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if not 'following_username' in request.data:
+            raise ValidationError({"following_username": "Field is required"})
+
+        following_user = get_object_or_404(User, username=request.data['following_username'])
+        follow_service = FollowService(follower_user=request.user, following_user=following_user)
+        follow_service.unfollow()
+        return Response(follow_service.result(),status=status.HTTP_201_CREATED)
+
+
+class FollowRequestAccept(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if not 'sender_username' in request.data:
+            raise ValidationError({"sender_username": "Field is required"})
+
+        sender_user = get_object_or_404(User, username=request.data['sender_username'])
+        follow_service = FollowService(follower_user=sender_user, following_user=request.user)
+        follow_service.accept_follow_request()
+        return Response(follow_service.result(), status=status.HTTP_200_OK)
+
+
+class FollowRequestReject(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if not 'sender_username' in request.data:
+            raise ValidationError({"sender_username": "Field is required"})
+
+        sender_user = get_object_or_404(User, username=request.data['sender_username'])
+        follow_service = FollowService(follower_user=sender_user, following_user=request.user)
+        follow_service.reject_follow_request()
+        return Response(follow_service.result(), status=status.HTTP_200_OK)
+
+
+class FollowRequestRevoke(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if not 'receiver_username' in request.data:
+            raise ValidationError({"receiver_username": "Field is required"})
+
+        receiver_user = get_object_or_404(User, username=request.data['receiver_username'])
+        follow_service = FollowService(follower_user=request.user, following_user=receiver_user)
+        follow_service.revoke_follow_request()
+        return Response(follow_service.result(), status=status.HTTP_200_OK)
