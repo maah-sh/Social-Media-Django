@@ -3,7 +3,7 @@ from rest_framework.fields import SerializerMethodField
 from rest_framework.validators import UniqueValidator
 from django.db import transaction
 from django.contrib.auth.models import User
-from users.models import Profile, Follow
+from users.models import Profile, Follow, FollowRequest
 from posts.serializers import PostSerializer
 
 
@@ -115,3 +115,24 @@ class FollowerSerializer(serializers.ModelSerializer):
 
     def get_follower_username(self, obj):
         return obj.follower_user.username
+
+
+class SentFollowRequestSerializer(serializers.ModelSerializer):
+    to_username = SerializerMethodField()
+
+    class Meta:
+        model = FollowRequest
+        fields = ['to_user_id', 'to_username', 'created_at']
+
+    def get_to_username(self, obj):
+        return obj.to_user.username
+
+class ReceivedFollowRequestSerializer(serializers.ModelSerializer):
+    from_username = SerializerMethodField()
+
+    class Meta:
+        model = FollowRequest
+        fields = ['from_user_id', 'from_username', 'created_at']
+
+    def get_from_username(self, obj):
+        return obj.from_user.username

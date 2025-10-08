@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from users.models import Profile, Follow, FollowRequest, FollowRequestStatus
 from users.serializers import UserRegisterSerializer, UserLoginSerializer, UserReadOnlySerializer
 from users.serializers import ProfileSerializer, UserProfileSerializer, UserPrivateProfileSerializer
-from users.serializers import FollowingSerializer, FollowerSerializer
+from users.serializers import FollowingSerializer, FollowerSerializer, SentFollowRequestSerializer, ReceivedFollowRequestSerializer
 from users.services import FollowService
 
 
@@ -173,3 +173,19 @@ class FollowersList(generics.ListAPIView):
         return self.request.user.followers.all()
 
 
+class SentFollowRequestsList(generics.ListAPIView):
+    serializer_class = SentFollowRequestSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.request.user.sent_follow_requests.filter(status=FollowRequestStatus.PENDING)
+
+
+class ReceivedFollowRequestsList(generics.ListAPIView):
+    serializer_class = ReceivedFollowRequestSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.request.user.received_follow_requests.filter(status=FollowRequestStatus.PENDING)
