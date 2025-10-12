@@ -3,7 +3,7 @@ from rest_framework.fields import SerializerMethodField
 from rest_framework.validators import UniqueValidator
 from django.db import transaction
 from django.contrib.auth.models import User
-from users.models import Profile, Follow, FollowRequest
+from users.models import Profile, Follow, FollowRequest, FollowRequestStatus
 from posts.serializers import PostSerializer
 
 
@@ -67,12 +67,16 @@ class UserReadOnlySerializer(serializers.ModelSerializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
      profile = ProfileSerializer()
+     follow_status = SerializerMethodField()
+     followers_count = SerializerMethodField()
+     following_count = SerializerMethodField()
      posts_count = SerializerMethodField()
      posts = SerializerMethodField()
 
      class Meta:
          model = User
-         fields = ['username', 'first_name', 'last_name', 'profile', 'posts_count', 'posts']
+         fields = ['username', 'first_name', 'last_name', 'profile', 'follow_status', 'followers_count', 'following_count',
+                   'posts_count', 'posts']
          extra_kwargs = {
              'username': {'read_only': True},
              'first_name': {'read_only': True},
@@ -80,8 +84,28 @@ class UserProfileSerializer(serializers.ModelSerializer):
          }
 
 
+     def get_follow_status(self, user):
+         if self.context['request'].user == user:
+             return 'your profile'
+         elif user.followers.filter(follower_user_id = self.context['request'].user.id).exists():
+             return 'followed'
+         elif user.received_follow_requests.filter(from_user_id = self.context['request'].user.id, status=FollowRequestStatus.PENDING).exists():
+             return 'requested'
+         else:
+             return 'not followed'
+
+
+     def get_followers_count(self, user):
+         return user.followers.count()
+
+
+     def get_following_count(self, user):
+         return user.following.count()
+
+
      def get_posts_count(self, user):
          return user.posts.filter(is_archived=False).count()
+
 
      def get_posts(self, user):
          posts = user.posts.filter(is_archived=False)
