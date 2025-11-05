@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-u$!9bgcp9znoamf*2d*&=scn)0do(+s*lso7$#_zp870$a22%&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'users',
     'posts',
+    'channels_exercise',
 ]
 
 MIDDLEWARE = [
@@ -76,6 +77,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'social_media.wsgi.application'
 ASGI_APPLICATION = 'social_media.asgi.application'
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
