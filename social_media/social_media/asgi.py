@@ -7,6 +7,7 @@ import os
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from channels.security.websocket import AllowedHostsOriginValidator
+from django_channels_jwt.middleware import JwtAuthMiddlewareStack
 from django.core.asgi import get_asgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'social_media.settings')
@@ -18,6 +19,6 @@ from messenger.routing import websocket_urlpatterns
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
     "websocket": AllowedHostsOriginValidator(
-                AuthMiddlewareStack(URLRouter(websocket_urlpatterns))
+                JwtAuthMiddlewareStack(URLRouter(websocket_urlpatterns))
             ),
 })
