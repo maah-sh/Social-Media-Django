@@ -23,6 +23,8 @@ class Comment(models.Model):
     object_id = models.PositiveBigIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
     replies = GenericRelation('self')
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         indexes = [
