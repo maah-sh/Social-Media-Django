@@ -1,4 +1,5 @@
 from rest_framework import generics
+from rest_framework.pagination import CursorPagination
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,6 +16,7 @@ class UserPostsList(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     is_archived = False
+    pagination_class = CursorPagination
 
     def get_queryset(self):
         return Post.objects.filter(owner=self.request.user, is_archived=self.is_archived)
@@ -25,6 +27,7 @@ class PostsList(generics.ListAPIView):
     serializer_class = PostSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = CursorPagination
 
 
 class PostCreate(generics.CreateAPIView):
@@ -69,8 +72,10 @@ class PostCommentsList(APIView):
 
     def get(self, request, pk, format=None):
         comments = Comment.objects.filter(post__pk=pk)
-        serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data)
+        paginator = CursorPagination()
+        page = paginator.paginate_queryset(comments, request, self)
+        serializer = CommentSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 class LikePost(APIView):

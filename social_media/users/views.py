@@ -1,6 +1,7 @@
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -159,24 +160,27 @@ class FollowingList(generics.ListAPIView):
     serializer_class = FollowingSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        return self.request.user.following.all()
+        return self.request.user.following.order_by('following_user__username')
 
 
 class FollowersList(generics.ListAPIView):
     serializer_class = FollowerSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        return self.request.user.followers.all()
+        return self.request.user.followers.order_by('follower_user__username')
 
 
 class SentFollowRequestsList(generics.ListAPIView):
     serializer_class = SentFollowRequestSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         return self.request.user.sent_follow_requests.filter(status=FollowRequestStatus.PENDING)
@@ -186,6 +190,7 @@ class ReceivedFollowRequestsList(generics.ListAPIView):
     serializer_class = ReceivedFollowRequestSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         return self.request.user.received_follow_requests.filter(status=FollowRequestStatus.PENDING)

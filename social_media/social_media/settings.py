@@ -156,8 +156,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication'
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': None,
+    'PAGE_SIZE' : 5,
 }
+
+SILENCED_SYSTEM_CHECKS = ['rest_framework.W001']
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=5),
