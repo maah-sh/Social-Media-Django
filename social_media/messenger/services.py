@@ -17,8 +17,6 @@ class MessageService:
             sender=self.sender,
             content=self.content
         )
-        self.conversation.last_message_content = self.content
-        self.conversation.save()
 
 
 class PrivateChatService:

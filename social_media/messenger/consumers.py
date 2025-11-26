@@ -36,7 +36,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await database_sync_to_async(message_service.create_message)()
         await self.channel_layer.group_send(self.conversation_group_name,{"type": "send.message", "message": content})
         async for participant in self.conversation.participants.all():
-            print(participant.pk)
             await self.channel_layer.group_send(f"chat_list_{participant.pk}", {"type": "chat.list.update"})
 
     async def send_message(self, event):
