@@ -4,7 +4,8 @@ from . import views
 urlpatterns = [
     path('user-posts/', views.UserPostsList.as_view()),
     path('user-archived-posts/', views.UserPostsList.as_view(is_archived=True)),
-    path('explore-posts/', views.PostsList.as_view()),
+    path('explore-posts/', views.ExplorePostsList.as_view()),
+    path('feed-posts/', views.FeedPostsList.as_view()),
     path('post/', views.PostCreate.as_view()),
     path('post/<int:pk>/', views.PostRetrieveUpdateDestroy.as_view()),
     path('comment/', views.CommentCreate.as_view()),

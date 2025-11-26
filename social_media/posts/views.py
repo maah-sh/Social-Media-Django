@@ -1,5 +1,6 @@
+from django.db.models import Q
 from rest_framework import generics
-from rest_framework.pagination import CursorPagination
+from rest_framework.pagination import CursorPagination, PageNumberPagination
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -16,18 +17,32 @@ class UserPostsList(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     is_archived = False
-    pagination_class = CursorPagination
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         return Post.objects.filter(owner=self.request.user, is_archived=self.is_archived)
 
 
-class PostsList(generics.ListAPIView):
-    queryset = Post.objects.filter(owner__profile__is_private=False, is_archived=False)
+class FeedPostsList(generics.ListAPIView):
     serializer_class = PostSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     pagination_class = CursorPagination
+
+    def get_queryset(self):
+
+        return Post.objects.filter(is_archived=False).filter(
+            Q(owner=self.request.user) |
+            Q(owner__pk__in=self.request.user.following.values_list('following_user__pk'))
+        ).order_by('-created')
+
+
+class ExplorePostsList(generics.ListAPIView):
+    queryset = Post.objects.filter(owner__profile__is_private=False, is_archived=False)
+    serializer_class = PostSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = PageNumberPagination
 
 
 class PostCreate(generics.CreateAPIView):
