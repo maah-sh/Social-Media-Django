@@ -8,12 +8,15 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
+from django_filters import rest_framework as django_filters_rest
 from django.contrib.auth.models import User
 from users.models import Profile, Follow, FollowRequest, FollowRequestStatus
 from users.serializers import UserRegisterSerializer, UserLoginSerializer, UserReadOnlySerializer
 from users.serializers import ProfileSerializer, UserProfileSerializer, UserPrivateProfileSerializer
 from users.serializers import FollowingSerializer, FollowerSerializer, SentFollowRequestSerializer, ReceivedFollowRequestSerializer
+from users.serializers import UserSearchSerializer
 from users.services import FollowService
+from users.filters import UserSearchFilter
 
 
 class Register(APIView):
@@ -194,3 +197,15 @@ class ReceivedFollowRequestsList(generics.ListAPIView):
 
     def get_queryset(self):
         return self.request.user.received_follow_requests.filter(status=FollowRequestStatus.PENDING)
+
+
+class SearchUserView(generics.ListAPIView):
+    serializer_class = UserSearchSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = PageNumberPagination
+    filter_backends = [django_filters_rest.DjangoFilterBackend]
+    filterset_class = UserSearchFilter
+
+    def get_queryset(self):
+        return User.objects.filter(is_staff=False, is_active=True)

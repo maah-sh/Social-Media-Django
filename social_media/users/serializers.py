@@ -21,11 +21,10 @@ class ProfileSerializer(serializers.ModelSerializer):
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(required=True, write_only=True)
     password_confirmation = serializers.CharField(required=True, write_only=True)
-    profile = ProfileSerializer()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'password_confirmation', 'profile']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'password_confirmation']
         extra_kwargs = {
             'username': {'required': True, 'validators': [UniqueValidator(queryset=User.objects.all())]},
             'email': {'required': True, 'validators': [UniqueValidator(queryset=User.objects.all())]},
@@ -40,11 +39,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        profile_data = validated_data.pop('profile')
         user = User.objects.create(**validated_data)
         user.set_password(validated_data['password'])
         user.save()
-        Profile.objects.create(user=user, **profile_data)
         return user
 
 
@@ -160,3 +157,17 @@ class ReceivedFollowRequestSerializer(serializers.ModelSerializer):
 
     def get_from_username(self, obj):
         return obj.from_user.username
+
+
+class UserSearchSerializer(serializers.ModelSerializer):
+    profile_image = serializers.ImageField(source='profile.image')
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'profile_image']
+        extra_kwargs = {
+            'username': {'read_only': True},
+            'first_name': {'read_only': True},
+            'last_name': {'read_only': True},
+            'profile_image': {'read_only': True},
+        }
