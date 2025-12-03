@@ -17,4 +17,5 @@ urlpatterns = [
     path('follow-request/sent/', views.SentFollowRequestsList.as_view()),
     path('follow-request/received/', views.ReceivedFollowRequestsList.as_view()),
     path('search/', views.SearchUserView.as_view()),
+    path('send-verification-email/', views.SendVerificationEmail.as_view()),
 ]

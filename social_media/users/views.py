@@ -17,6 +17,7 @@ from users.serializers import FollowingSerializer, FollowerSerializer, SentFollo
 from users.serializers import UserSearchSerializer
 from users.services import FollowService
 from users.filters import UserSearchFilter
+from users.tasks import send_email_to_user
 
 
 class Register(APIView):
@@ -209,3 +210,16 @@ class SearchUserView(generics.ListAPIView):
 
     def get_queryset(self):
         return User.objects.filter(is_staff=False, is_active=True)
+
+
+class SendVerificationEmail(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        send_email_to_user.delay(
+            subject='Email Verification',
+            message='Verification message: feature not implemented yet',
+            user_email=request.user.email
+        )
+        return Response({'details': 'Verification email task queued'}, status=status.HTTP_200_OK)

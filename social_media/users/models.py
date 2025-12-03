@@ -45,3 +45,14 @@ class FollowRequest(models.Model):
                 name='unique_pending_follow_request'
             )
         ]
+
+
+class ProfileCount(models.Model):
+    all = models.PositiveBigIntegerField()
+    public = models.PositiveBigIntegerField()
+    private = models.PositiveBigIntegerField()
+    created = models.DateTimeField(auto_now_add=True)
+
+
+    def __str__(self):
+        return f"Profile Count -> all: {self.all}, public: {self.public}, private: {self.private}"
